@@ -1,8 +1,9 @@
 from glob import glob
 import logging
+import os
 from random import choice
 
-from utilites import get_keyboard, get_user_smile
+from utilites import get_keyboard, get_user_smile, is_horse
 
 def greet_user(bot, update, user_data):
     smile = get_user_smile(user_data)
@@ -41,3 +42,19 @@ def get_contact(bot, update, user_data):
 def get_location(bot, update, user_data):
     print(update.message.location)
     update.message.reply_text('Готово {}'.format(get_user_smile(user_data)),reply_markup=get_keyboard())
+
+def check_user_photo(bot, update, user_data):
+    update.message.reply_text('Обрабатываю фото')
+    os.makedirs('downloads', exist_ok=True) #Создаем папку 'downloads'
+    photo_file = bot.getFile(update.message.photo[-1].file_id) #Если в бот присылают фото, он конвертирует в .jpg и сохраняет несколько превьюшек (мы идентификатор последней версии - оригинальную фотку)
+    filename = os.path.join('downloads', '{}.jpg'.format(photo_file.file_id)) #Путь сохранения картинки (os.path.join - функция, которая соединяет название папок и файлов между собой при помощи правильного слэша)
+    photo_file.download(filename) #Сохраняем файл
+    if is_horse(filename):
+        update.message.reply_text('Обнаружена лошадка, добавляю в библиотеку!')
+        new_filename = os.path.join('Horses', 'horse_{}.jpg'.format(photo_file.file_id))
+        os.rename(filename, new_filename) #Переместим файл и переименует его
+    else:
+        update.message.reply_text('Тревога, лошадка не обнаружена!')
+        os.remove(filename) #Удаляем файл
+        
+    
