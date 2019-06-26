@@ -48,7 +48,7 @@ def change_avatar(bot, update, user_data):
 def get_contact(bot, update, user_data):
     print(update.message.contact)
     update.message.reply_text('Готово {}'.format(get_user_smile(user_data)),reply_markup=get_keyboard())
-    
+
 
 def get_location(bot, update, user_data):
     print(update.message.location)
@@ -89,4 +89,5 @@ def main():
     mybot.start_polling() #начни ходить на платформу telegram и проверять наличие сообщений
     mybot.idle() #будет выполнять пока принудитлеьноне остановим
 
-main()
+if __name__ == '__main__':
+    main()
