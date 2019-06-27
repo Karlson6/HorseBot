@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, Filters
+
+from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, ConversationHandler, Filters
 
 from handlers import *
 import settings
@@ -20,7 +21,19 @@ def main():
     logging.info("Бот запустился")
 
     dp = mybot.dispatcher
+    anketa = ConversationHandler(
+        entry_points=[RegexHandler('^(Заполнить анкету)$', anketa_start, pass_user_data=True)],#Вход в диалог
+        states={
+            'name': [MessageHandler(Filters.text, anketa_get_name, pass_user_data=True)],
+            'rating': [RegexHandler('^(1|2|3|4|5)$', anketa_rating, pass_user_data=True)],
+            'comment': [MessageHandler(Filters.text, anketa_comment, pass_user_data=True),
+                        CommandHandler('cancel', anketa_skip_comment, pass_user_data=True)]
+        },#Состояние
+        fallbacks=[MessageHandler(Filters.text, dont_know, pass_user_data=True)]#Обработка ошибок
+    )
+    
     dp.add_handler(CommandHandler('start', greet_user, pass_user_data=True))
+    dp.add_handler(anketa)
     dp.add_handler(CommandHandler('horse', send_horse_picture, pass_user_data=True))
     dp.add_handler(RegexHandler('^(Прислать лошадку)$',send_horse_picture, pass_user_data=True))
     dp.add_handler(RegexHandler('^(Сменить аватарку)$',change_avatar, pass_user_data=True))
@@ -31,6 +44,7 @@ def main():
     
     mybot.start_polling() #начни ходить на платформу telegram и проверять наличие сообщений
     mybot.idle() #будет выполнять пока принудитлеьноне остановим
+
 
 if __name__ == '__main__':
     main()

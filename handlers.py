@@ -3,6 +3,11 @@ import logging
 import os
 from random import choice
 
+from telegram import ReplyKeyboardRemove #Скрывающаяся клавиатура
+from telegram import ReplyKeyboardMarkup
+from telegram import ParseMode #Форматирование
+from telegram.ext import ConversationHandler
+
 from utilites import get_keyboard, get_user_smile, is_horse
 
 def greet_user(bot, update, user_data):
@@ -56,5 +61,46 @@ def check_user_photo(bot, update, user_data):
     else:
         update.message.reply_text('Тревога, лошадка не обнаружена!')
         os.remove(filename) #Удаляем файл
-        
-    
+
+def anketa_start(bot, update, user_data):
+    update.message.reply_text('Как вас зовут? Напишите имя и фамилию', reply_markup=ReplyKeyboardRemove())
+    return "name"
+
+def anketa_get_name(bot, update, user_data):
+    user_name = update.message.text
+    if len(user_name.split(' ')) != 2:
+        update.message.reply_text('Пожалуйста введите имя и фамилию')
+        return 'name'
+    else:
+        user_data['anketa_name'] = user_name
+        reply_keyboard = [['1', '2', '3', '4', '5']] #Создаем клавиатуру
+
+        update.message.reply_text(
+            'Оцените бота от 1 до 5',
+            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        )
+        return 'rating'
+
+def anketa_rating(bot, update, user_data):
+    user_data['ankera_rating'] = update.message.text
+    update.message.reply_text('Пожалуйста напишите отзыв в свободной форме или /cancel, чтобы пропустить шаг')
+    return 'comment'
+
+def anketa_comment(bot, update, user_data):
+    user_data['anketa_comment'] = update.message.text
+    text = '''
+<b>Имя Фамилия:</b> {anketa_name}
+<b>Оценка:</b> {ankera_rating}
+<b>Комментарий:</b> {anketa_comment}'''.format(**user_data)
+    update.message.reply_text(text, replu_markup=get_keyboard(), parse_mode=ParseMode.HTML)
+    return ConversationHandler.END
+
+def anketa_skip_comment(bot, update, user_data):
+    text = '''
+<b>Имя Фамилия:</b> {anketa_name}
+<b>Оценка:</b> {ankera_rating}'''.format(**user_data)
+    update.message.reply_text(text, reply_markup=get_keyboard(), parse_mode=ParseMode.HTML)
+    return ConversationHandler.END
+
+def dont_know(bot, update, user_data):
+    update.message.reply_text('Не понимаю')
