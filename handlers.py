@@ -8,9 +8,11 @@ from telegram import ReplyKeyboardMarkup
 from telegram import ParseMode #Форматирование
 from telegram.ext import ConversationHandler
 
+from bot import subscribers
 from utilites import get_keyboard, get_user_smile, is_horse
 
 def greet_user(bot, update, user_data):
+    print(update.message.chat_id)
     smile = get_user_smile(user_data)
     user_data['smile'] = smile
     text = f'Привет!{format(smile)}'
@@ -104,3 +106,27 @@ def anketa_skip_comment(bot, update, user_data):
 
 def dont_know(bot, update, user_data):
     update.message.reply_text('Не понимаю')
+
+def subscribe(bot, update): 
+    subscribers.add(update.message.chat_id)
+    update.message.reply_text('Вы подписались')
+    print(subscribers)
+
+def my_test(bot, job):
+    bot.sendMessage(chat_id = 320778871, text = 'Lovely Spam!') #Отправляем сообщение пользователю
+    job.interval += 5
+    print(datetime.datetime.now())
+    if job.interval > 15:
+        bot.sendMessage(chat_id = 320778871, text = 'Пока!')
+        job.schedule_removal()#Удалит задачу из очереди задач (перестанет присылать сообщения)
+
+def send_updates(bot, job):
+    for chat_id in subscribers:
+        bot.sendMessage(chat_id = chat_id, text = 'Это просто текст')
+
+def unsubscribe(bot, update):
+    if update.message.chat_id in subscribers:
+        subscribers.remove(update.message.chat_id)
+        update.message.reply_text('Вы отписались')
+    else:
+        update.message.reply_text('Вы не подписаны')
