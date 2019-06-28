@@ -132,3 +132,15 @@ def unsubscribe(bot, update):
         update.message.reply_text('Вы отписались')
     else:
         update.message.reply_text('Вы не подписаны')
+
+def set_alarm(bot, update, args, job_queue):
+    try:
+        seconds = abs(int(args[0]))
+        job_queue.run_once(alarm, seconds, context=update.message.chat_id)
+    except (IndexError, ValueError):
+        update.message.reply_text('Введите число секунд после команды /alarm')
+
+@mq.queuedmessage
+def alarm(bot, job):
+    bot.send_message(chat_id = job.context, text = 'Сработал будильник')
+

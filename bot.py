@@ -47,6 +47,7 @@ def main():
     dp.add_handler(CommandHandler('horse', send_horse_picture, pass_user_data=True))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
+    dp.add_handler(CommandHandler('alarm', set_alarm, pass_args=True, pass_job_queue=True))
     dp.add_handler(RegexHandler('^(Прислать лошадку)$',send_horse_picture, pass_user_data=True))
     dp.add_handler(RegexHandler('^(Сменить аватарку)$',change_avatar, pass_user_data=True))
     dp.add_handler(MessageHandler(Filters.contact, get_contact, pass_user_data=True))
