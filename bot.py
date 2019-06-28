@@ -3,6 +3,7 @@ import logging
 
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, ConversationHandler, Filters
+from telegram.ext import messagequeue as mq #Работа с лимитами
 
 from handlers import *
 import settings
@@ -20,6 +21,8 @@ subscribers = set()#Множество (уникальные значения)
 
 def main():
     mybot = Updater(settings.API_KEY, request_kwargs = settings.PROXY)
+    mybot.bot._msg_queue = mq.MessageQueue() #Работа с лимитами (инициализировали переменную)
+    mybot.bot._is_messages_queued_default = True #Сообщения должны по умолчанию ставится в очередь
     
     logging.info("Бот запустился")
 

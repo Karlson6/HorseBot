@@ -7,6 +7,7 @@ from telegram import ReplyKeyboardRemove #Скрывающаяся клавиа�
 from telegram import ReplyKeyboardMarkup
 from telegram import ParseMode #Форматирование
 from telegram.ext import ConversationHandler
+from telegram.ext import messagequeue as mq #Работа с лимитами
 
 from bot import subscribers
 from utilites import get_keyboard, get_user_smile, is_horse
@@ -120,6 +121,7 @@ def my_test(bot, job):
         bot.sendMessage(chat_id = 320778871, text = 'Пока!')
         job.schedule_removal()#Удалит задачу из очереди задач (перестанет присылать сообщения)
 
+@mq.queuedmessage #декоратор - функция, которая оборачивает вызываемую функцию
 def send_updates(bot, job):
     for chat_id in subscribers:
         bot.sendMessage(chat_id = chat_id, text = 'Это просто текст')
